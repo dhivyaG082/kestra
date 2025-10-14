@@ -2,7 +2,7 @@
     <el-table stripe table-layout="auto" fixed :data="variables">
         <el-table-column prop="key" rowspan="3" :label="$t('name')">
             <template #default="scope">
-                <code>{{ scope.row.key }}</code>
+                <code>{{ getHumanizeLabel(scope.row.key) }}</code>
             </template>
         </el-table-column>
 
@@ -60,6 +60,29 @@
         methods: {
             emit(type, event) {
                 this.$emit(type, event);
+            },
+            getHumanizeLabel(key) {
+                // Known trigger/display keys mapped to existing translation keys
+                const knownMappings = {
+                    id: "id",
+                    key: "key",
+                    type: "type",
+                    cron: "cron",
+                    description: "description",
+                    namespace: "namespace",
+                    flowId: "flow",
+                    nextExecutionDate: "next execution date",
+                    updatedDate: "updated date",
+                    date: "date",
+                    state: "state",
+                    states: "state" // avoid missing i18n key; use singular label
+                };
+
+                const lastPath = String(key).split(".").pop();
+                const translationKey = knownMappings[lastPath] || null;
+
+                // Only translate when we have a known mapping to prevent i18n missing-key warnings
+                return translationKey ? this.$t(translationKey) : key;
             }
         }
     };
