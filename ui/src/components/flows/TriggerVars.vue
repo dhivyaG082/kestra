@@ -78,11 +78,28 @@
                     states: "state" // avoid missing i18n key; use singular label
                 };
 
+                // Handle null/undefined keys
+                if (!key) {
+                    return key;
+                }
+
+                // Extract the last part of the key path for matching
                 const lastPath = String(key).split(".").pop();
-                const translationKey = knownMappings[lastPath] || null;
+                const translationKey = knownMappings[lastPath];
 
                 // Only translate when we have a known mapping to prevent i18n missing-key warnings
-                return translationKey ? this.$t(translationKey) : key;
+                if (translationKey) {
+                    try {
+                        return this.$t(translationKey);
+                    } catch (error) {
+                        // Fallback to raw key if translation fails
+                        console.warn(`Translation failed for key '${translationKey}':`, error);
+                        return key;
+                    }
+                }
+                
+                // Return the raw key if no mapping exists
+                return key;
             }
         }
     };
